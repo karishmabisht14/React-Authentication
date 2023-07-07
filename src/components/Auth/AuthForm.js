@@ -45,6 +45,7 @@ const AuthForm = () => {
           return res.json().then((data) => {
             authCtx.login(data.idToken);
             history.replace('/profile');
+            setInterval(authCtx.logout, 300000);
           });
         } else {
           return res.json().then((data) => {
