@@ -2,15 +2,17 @@ import { useState, useRef, useContext } from "react";
 
 import classes from "./AuthForm.module.css";
 import AuthContext from "../../store/auth-context";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const AuthForm = () => {
   const authCtx = useContext(AuthContext);
-
-  const enteredInputEmail = useRef("");
-  const enteredInputPassword = useRef("");
+  const history = useHistory();
+  
+  const enteredInputEmailRef = useRef("");
+  const enteredInputPasswordRef = useRef("");
 
   const [isLogin, setIsLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
@@ -19,14 +21,15 @@ const AuthForm = () => {
   const submitHandler = (event) => {
     event.preventDefault();
 
-    const enteredEmail = enteredInputEmail.current.value;
-    const enteredPassword = enteredInputPassword.current.value;
+    const enteredEmail = enteredInputEmailRef.current.value;
+    const enteredPassword = enteredInputPasswordRef.current.value;
 
     setIsLoading(true);
     if (isLogin) {
-      fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBTc5hUWuJpKA5VgG9JxBTO90TXT7mmdNg',
+      fetch(
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBTc5hUWuJpKA5VgG9JxBTO90TXT7mmdNg",
         {
-          method: 'POST',
+          method: "POST",
           body: JSON.stringify({
             email: enteredEmail,
             password: enteredPassword,
@@ -36,28 +39,26 @@ const AuthForm = () => {
             'Content-Type': 'application/json',
           },
         }
-      ).then(res => {
+      ).then((res) => {
         setIsLoading(false);
-        if(res.ok) {
-          return res.json().then(data => {
+        if (res.ok) {
+          return res.json().then((data) => {
             authCtx.login(data.idToken);
-          })
-        }
-        else {
-          return res.json().then(data => {
-            let errorMessage = 'Authentication Failed!!!'
-            if(data && data.error && data.error.message) {
+            history.replace('/profile');
+          });
+        } else {
+          return res.json().then((data) => {
+            let errorMessage = "Authentication Failed!!!";
+            if (data && data.error && data.error.message) {
               errorMessage = data.error.message;
             }
             alert(errorMessage);
-          })
+          });
         }
-      })
-    }
-     
-    else {
+      });
+    } else {
       fetch(
-        'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBTc5hUWuJpKA5VgG9JxBTO90TXT7mmdNg',
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBTc5hUWuJpKA5VgG9JxBTO90TXT7mmdNg",
         {
           method: "POST",
           body: JSON.stringify({
@@ -69,18 +70,17 @@ const AuthForm = () => {
             "Content-Type": "application/json",
           },
         }
-      ).then(res => {
+      ).then((res) => {
         setIsLoading(false);
-        if(res.ok) {
-
-        }else {
-          return res.json().then(data => {
-            let errorMessage = 'Authentication Falied!!!'
-            if(data && data.error && data.error.message) {
+        if (res.ok) {
+        } else {
+          return res.json().then((data) => {
+            let errorMessage = "Authentication Falied!!!";
+            if (data && data.error && data.error.message) {
               errorMessage = data.error.message;
             }
             alert(errorMessage);
-          })
+          });
         }
       });
     }
@@ -92,7 +92,7 @@ const AuthForm = () => {
       <form onSubmit={submitHandler}>
         <div className={classes.control}>
           <label htmlFor="email">Your Email</label>
-          <input type="email" id="email" required ref={enteredInputEmail} />
+          <input type="email" id="email" required ref={enteredInputEmailRef} />
         </div>
         <div className={classes.control}>
           <label htmlFor="password">Your Password</label>
@@ -100,11 +100,13 @@ const AuthForm = () => {
             type="password"
             id="password"
             required
-            ref={enteredInputPassword}
+            ref={enteredInputPasswordRef}
           />
         </div>
         <div className={classes.actions}>
-          {!isLoading && <button>{isLogin ? "Login" : "Create Account"}</button>}
+          {!isLoading && (
+            <button>{isLogin ? "Login" : "Create Account"}</button>
+          )}
           {isLoading && <p>Sending Request...</p>}
           <button
             type="button"
